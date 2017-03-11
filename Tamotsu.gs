@@ -1,8 +1,44 @@
-var Table = {};
+/*
+Usage:
+
+var Customer = Tamotsu.Table.define({
+	sheetName: 'customers',
+	
+	fullName: function() {
+		return this['First Name'] + ' ' + this['Last Name'];
+	},
+});
+
+// preparation
+var ss = SpreadsheetApp.getActive();
+Tamotsu.init(ss);
+
+var firstCustomer = Customer.first();
+firstCustomer.fullName(); //=> 'John Casey'
+firstCustomer['Last Name'] = 'Casey';
+firstCustomer.save(); // flush the change
+
+var jpCustomers = Customer
+	.where(function(customer) { return customer.country === 'Japan'; })
+	.order(function(customer) { return customer['First Name']; })
+	.all();
+Customer.beginTrans(function() {
+	jpCustomers.forEach(function(customer) {
+		// modify...
+		customer.save();
+	});
+});	// flush the changes
+*/
+
+var Tamotsu_ = {};
+var init = function(spreadsheet) {
+  Tamotsu_.ss = spreadsheet;
+}
 
 /**
  * Tamotsu.Table
  */
+var Table = {};
 Table = (function() {
   Table.define = function(options) {
     return new constructor(options);
@@ -97,9 +133,3 @@ var __Table__ = (function(){
   
   return __Table__;
 })();
-
-
-var Tamotsu_ = {};
-var init = function(spreadsheet) {
-  Tamotsu_.ss = spreadsheet;
-}
