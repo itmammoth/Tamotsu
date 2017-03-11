@@ -28,7 +28,6 @@ var Table = (function() {
     return this.__.toObject(range.getValues()[0]);
   };
   
-  
   /**
    * Returns the last record.
    *
@@ -37,6 +36,20 @@ var Table = (function() {
   _p.last = function() {
     var range = this.__.dataRange().offset(this.sheet.getLastRow() - 1, 0, 1);
     return this.__.toObject(range.getValues()[0]);
+  };
+  
+  /**
+   * Returns all records.
+   *
+   * @return {object} all records
+   */
+  _p.all = function() {
+    var records = [];
+    var that = this;
+    this.__.allValues().forEach(function(values) {
+      records.push(that.__.toObject(values));
+    });
+    return records;
   };
   
   /**
@@ -73,6 +86,12 @@ var __Table__ = (function(){
       obj[c] = values[i];
     });
     return obj;
+  };
+  
+  _p.allValues = function() {
+    var allValues = this.dataRange().getValues();
+    allValues.shift();
+    return allValues;
   };
   
   return __Table__;
