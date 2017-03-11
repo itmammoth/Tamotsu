@@ -1,22 +1,23 @@
+var Table = {};
+
 /**
  * Tamotsu.Table
- *
- * var sheet = SpreadsheetApp.getActiveSheet();
- * var ttable = new Tamotsu.Table(sheet);
- * Logger.log(ttable.first());
- * => { '#': 1, 'First Name': 'Charles', 'Last Name': 'Bartowski' }
  */
-var Table = (function() {
+Table = (function() {
+  Table.define = function(options) {
+    return new constructor(options);
+  };
+  
   /**
    * @constructor
    */
-  var Table = function(sheet, options) {
-    this.sheet = sheet;
+  var constructor = function(options) {
+    this.sheet = Tamotsu_.ss.getSheetByName(options.sheetName);
     this.options = options;
     this.__ = new __Table__(this);
   };
   
-  var _p = Table.prototype;
+  var _p = constructor.prototype;
   
   /**
    * Returns the first record.
@@ -96,3 +97,9 @@ var __Table__ = (function(){
   
   return __Table__;
 })();
+
+
+var Tamotsu_ = {};
+var init = function(spreadsheet) {
+  Tamotsu_.ss = spreadsheet;
+}
