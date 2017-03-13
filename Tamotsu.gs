@@ -1,135 +1,96 @@
-/*
-Usage:
-
-var Customer = Tamotsu.Table.define({
-	sheetName: 'customers',
-	
-	fullName: function() {
-		return this['First Name'] + ' ' + this['Last Name'];
-	},
-});
-
-// preparation
-var ss = SpreadsheetApp.getActive();
-Tamotsu.init(ss);
-
-var firstCustomer = Customer.first();
-firstCustomer.fullName(); //=> 'John Casey'
-firstCustomer['Last Name'] = 'Casey';
-firstCustomer.save(); // flush the change
-
-var jpCustomers = Customer
-	.where(function(customer) { return customer.country === 'Japan'; })
-	.order(function(customer) { return customer['First Name']; })
-	.all();
-Customer.beginTrans(function() {
-	jpCustomers.forEach(function(customer) {
-		// modify...
-		customer.save();
-	});
-});	// flush the changes
-*/
-
-var Tamotsu_ = {};
-var init = function(spreadsheet) {
-  Tamotsu_.ss = spreadsheet;
+var T_ = {};
+var initialize = function(spreadsheet) {
+  T_.ss = spreadsheet;
 }
 
-/**
- * Tamotsu.Table
- */
 var Table = {};
-Table = (function() {
+(function() {
   Table.define = function(options) {
-    return new constructor(options);
+    /**
+     * @constructor
+     *
+     * @param {object} attributes TODO
+     */
+    var TableClass = function(attributes) {
+      // TODO: attributesを代入する処理
+    };
+    TableClass.sheet = T_.ss.getSheetByName(options.sheetName);
+    TableClass.options = options;
+    TableClass.__ = privateClassPropsWith(TableClass);
+    Object.assign(TableClass, classProps);
+    Object.assign(TableClass.prototype, instanceProps);
+    return TableClass;
   };
   
-  /**
-   * @constructor
-   */
-  var constructor = function(options) {
-    this.sheet = Tamotsu_.ss.getSheetByName(options.sheetName);
-    this.options = options;
-    this.__ = new __Table__(this);
+  var classProps = {
+    /**
+     * Returns the first record.
+     *
+     * @return {object} the first record
+     */
+    first: function() {
+      var range = this.__.dataRange().offset(1, 0, 1);
+      return this.__.toObject(range.getValues()[0]);
+    },
+    
+    /**
+     * Returns the last record.
+     *
+     * @return {object} the last record
+     */
+    last: function() {
+      var range = this.__.dataRange().offset(this.sheet.getLastRow() - 1, 0, 1);
+      return this.__.toObject(range.getValues()[0]);
+    },
+    
+    /**
+     * Returns all records.
+     *
+     * @return {object} all records
+     */
+    all: function() {
+      var records = [];
+      var that = this;
+      this.__.allValues().forEach(function(values) {
+        records.push(that.__.toObject(values));
+      });
+      return records;
+    },
+    
+    /**
+     * Returns the column values.
+     *
+     * @return {array} the column values
+     */
+    columns: function() {
+      if (!this.columns.memo) {
+        this.columns.memo = this.__.dataRange().offset(0, 0, 1).getValues()[0];
+      }
+      return this.columns.memo;
+    },
   };
   
-  var _p = constructor.prototype;
-  
-  /**
-   * Returns the first record.
-   *
-   * @return {object} the first record
-   */
-  _p.first = function() {
-    var range = this.__.dataRange().offset(1, 0, 1);
-    return this.__.toObject(range.getValues()[0]);
+  var privateClassPropsWith = function(TableClass) {
+    return {
+      dataRange: function() {
+        return TableClass.sheet.getDataRange();
+      },
+      
+      toObject: function(values) {
+        var obj = {};
+        TableClass.columns().forEach(function(c, i) {
+          obj[c] = values[i];
+        });
+        return obj;
+      },
+      
+      allValues: function() {
+        var allValues = this.dataRange().getValues();
+        allValues.shift();
+        return allValues;
+      },
+    };
   };
   
-  /**
-   * Returns the last record.
-   *
-   * @return {object} the last record
-   */
-  _p.last = function() {
-    var range = this.__.dataRange().offset(this.sheet.getLastRow() - 1, 0, 1);
-    return this.__.toObject(range.getValues()[0]);
-  };
-  
-  /**
-   * Returns all records.
-   *
-   * @return {object} all records
-   */
-  _p.all = function() {
-    var records = [];
-    var that = this;
-    this.__.allValues().forEach(function(values) {
-      records.push(that.__.toObject(values));
-    });
-    return records;
-  };
-  
-  /**
-   * Returns the column values.
-   *
-   * @return {array} the column values
-   */
-  _p.columns = function() {
-    if (!this.columns.memo) {
-      this.columns.memo = this.__.dataRange().offset(0, 0, 1).getValues()[0];
-    }
-    return this.columns.memo;
-  };
-  
-  return Table;
-})();
-
-// TODO: privateメソッドの作り方をQiitaかブログで公開しょうかな
-// Private methods of Table
-var __Table__ = (function(){
-  var __Table__ = function(table) {
-    this.table = table;
-  };
-  
-  var _p = __Table__.prototype;
-  
-  _p.dataRange = function() {
-    return this.table.sheet.getDataRange();
-  };
-  
-  _p.toObject = function(values) {
-    var obj = {};
-    this.table.columns().forEach(function(c, i) {
-      obj[c] = values[i];
-    });
-    return obj;
-  };
-  
-  _p.allValues = function() {
-    var allValues = this.dataRange().getValues();
-    allValues.shift();
-    return allValues;
-  };
-  
-  return __Table__;
+  var instanceProps = {};
 })();
