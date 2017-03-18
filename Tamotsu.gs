@@ -24,17 +24,21 @@ if (typeof Object.assign != 'function') {
 
 
 var T_ = {};
+
+/**
+ * Initializes Tamotsu with the given objects
+ *
+ * @param {Spreadsheet} spreadsheet
+ */
 var register = function(spreadsheet) {
   T_.ss = spreadsheet;
 }
 
 var Table = (function() {
-  /**
-   * @constructor
-   *
-   * @param {object} attributes TODO
-   */
-  var Table = function(attributes) {
+  var Table = function(attributes, options) {
+    options = (options || {});
+    this.row = options.row;
+    
     attributes = (attributes || {});
     var that = this;
     this.class.columns().forEach(function(c) {
@@ -43,33 +47,19 @@ var Table = (function() {
   };
   
   Object.assign(Table, {
-    /**
-     * Returns the first record.
-     *
-     * @return {object} the first record
-     */
+  
     first: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
-      return new this(this.toObject(values[0]));
+      return new this(this.toObject(values[0]), { row: 2 });
     },
     
-    /**
-     * Returns the last record.
-     *
-     * @return {object} the last record
-     */
     last: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
       return new this(this.toObject(values[values.length - 1]));
     },
     
-    /**
-     * Returns all records.
-     *
-     * @return {object} all records
-     */
     all: function() {
       var records = [];
       var that = this;
@@ -79,11 +69,6 @@ var Table = (function() {
       return records;
     },
     
-    /**
-     * Returns the column values.
-     *
-     * @return {array} the column values
-     */
     columns: function() {
       if (!this.columns.memo) {
         this.columns.memo = this.dataRange().offset(0, 0, 1).getValues()[0];
@@ -91,21 +76,14 @@ var Table = (function() {
       return this.columns.memo;
     },
     
-    /**
-     * Returns the data range.
-     *
-     * @return {Range} the data range
-     */
     dataRange: function() {
       return this.sheet.getDataRange();
     },
     
-    /**
-     * Returns the object converted from values array.
-     *
-     * @param {array} values
-     * @return {object} the object converted from the given values
-     */
+    getRangeByRow: function(row) {
+      return this.dataRange().offset(row - 1, 0, 1);
+    },
+    
     toObject: function(values) {
       var obj = {};
       this.columns().forEach(function(c, i) {
@@ -114,21 +92,65 @@ var Table = (function() {
       return obj;
     },
     
-    /**
-     * Returns the all values
-     *
-     * @return {array} the all values
-     */
+    toValues: function(table) {
+      var values = [];
+      this.columns().forEach(function(c, i) {
+        values.push(table[c]);
+      });
+      return values;
+    },
+    
     allValues: function() {
       var allValues = this.dataRange().getValues();
       allValues.shift();
       return allValues;
     },
+    
+    create: function(table) {
+      var values = this.toValues(table);
+      var that = this;
+      this.withNextId(function(nextId) {
+        values[0] = nextId;
+        that.sheet.getRange(that.sheet.getLastRow() + 1, 1, 1, that.columns().length).setValues([values]);
+      });
+    },
+    
+    update: function(table) {
+      var values = this.toValues(table);
+      this.getRangeByRow(table.row).setValues([values]);
+    },
+    
+    destroy: function(table) {
+      this.sheet.deleteRow(table.row);
+    },
+    
+    withNextId: function(callback) {
+      var nextId = Math.max.apply(null, this.idValues()) + 1;
+      callback(nextId);
+    },
+    
+    idValues: function() {
+      var colIndex = this.columns().indexOf(this.idColumn);
+      if (colIndex === -1) throw 'Not found id column "' + this.idColumn + '" on ' + this.sheet.getName();
+      var idValues = [];
+      this.allValues().forEach(function(values) {
+        idValues.push(values[colIndex]);
+      });
+      return idValues;
+    },
   });
   
   Object.assign(Table.prototype, {
     save: function() {
-      return 'saved!';
+      if (this.row) {
+        this.class.update(this);
+      } else {
+        this.class.create(this);
+      }
+    },
+    
+    destroy: function() {
+      this.class.destroy(this);
     },
   });
   
@@ -138,7 +160,12 @@ var Table = (function() {
     Object.assign(Child, Table);
     Object.assign(Child.prototype, Table.prototype);
     Child.prototype.class = Child;
-    Child.sheet = T_.ss.getSheetByName(options.sheetName);
+
+    var o = Object.assign({
+      idColumn: '#',
+    }, (options || {}));
+    Child.sheet = T_.ss.getSheetByName(o.sheetName);
+    Child.idColumn = o.idColumn;
     return Child;
   };
   
