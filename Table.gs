@@ -133,17 +133,20 @@ var createTable_ = function(ss) {
   });
   
   Table.define = function(options) {
-    var Parent = this;
-    var Child = function() { return Parent.apply(this, arguments); };
-    Object.assign(Child, Table);
-    Object.assign(Child.prototype, Table.prototype);
-    Child.prototype.class = Child;
-
     var o = Object.assign({
       idColumn: '#',
+      mixin: {},
     }, (options || {}));
+    
+    var Parent = this;
+    var Child = function() { return Parent.apply(this, arguments); };
+    
+    Object.assign(Child, Table);
+    Object.assign(Child.prototype, Table.prototype, o.mixin);
+    Child.prototype.class = Child;
     Child.sheet = ss.getSheetByName(o.sheetName);
     Child.idColumn = o.idColumn;
+    
     return Child;
   };
   
