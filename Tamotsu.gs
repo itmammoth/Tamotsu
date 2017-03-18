@@ -51,22 +51,32 @@ var Table = (function() {
     first: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
-      return new this(this.toObject(values[0]), { row: 2 });
+      return new this(this.objectFrom(values[0]), { row: 2 });
     },
     
     last: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
-      return new this(this.toObject(values[values.length - 1]));
+      return new this(this.objectFrom(values[values.length - 1]));
     },
     
     all: function() {
       var records = [];
       var that = this;
       this.allValues().forEach(function(values) {
-        records.push(new that(that.toObject(values)));
+        records.push(new that(that.objectFrom(values)));
       });
       return records;
+    },
+    
+    where: function(predicate) {
+      var r = new Relation_(this);
+      return r.where(predicate);
+    },
+    
+    order: function(comparator) {
+      var r = new Relation_(this);
+      return r.order(comparator);
     },
     
     columns: function() {
@@ -80,11 +90,11 @@ var Table = (function() {
       return this.sheet.getDataRange();
     },
     
-    getRangeByRow: function(row) {
+    rangeByRow: function(row) {
       return this.dataRange().offset(row - 1, 0, 1);
     },
     
-    toObject: function(values) {
+    objectFrom: function(values) {
       var obj = {};
       this.columns().forEach(function(c, i) {
         obj[c] = values[i];
@@ -92,7 +102,7 @@ var Table = (function() {
       return obj;
     },
     
-    toValues: function(table) {
+    valuesFrom: function(table) {
       var values = [];
       this.columns().forEach(function(c, i) {
         values.push(table[c]);
@@ -107,7 +117,7 @@ var Table = (function() {
     },
     
     create: function(table) {
-      var values = this.toValues(table);
+      var values = this.valuesFrom(table);
       var that = this;
       this.withNextId(function(nextId) {
         values[0] = nextId;
@@ -116,8 +126,8 @@ var Table = (function() {
     },
     
     update: function(table) {
-      var values = this.toValues(table);
-      this.getRangeByRow(table.row).setValues([values]);
+      var values = this.valuesFrom(table);
+      this.rangeByRow(table.row).setValues([values]);
     },
     
     destroy: function(table) {
@@ -170,4 +180,50 @@ var Table = (function() {
   };
   
   return Table;
+})();
+
+var Relation_ = (function() {
+  var Relation_ = function(TableClass) {
+    this.Table = TableClass;
+    this.predicates = [];
+  };
+  
+  Object.assign(Relation_.prototype, {
+    where: function(predicate) {
+      this.predicates.push(predicate);
+      return this;
+    },
+    
+    all: function() {
+      var tables = [];
+      var that = this;
+      this.Table.allValues().forEach(function(values, i) {
+        var table = new that.Table(that.Table.objectFrom(values), { row: i + 2 });
+        var passed = true;
+        for (var i = 0; i < that.predicates.length; i++) {
+          passed = passed && that.predicates[i](table);
+          if (!passed) break;
+        }
+        if (passed) tables.push(table);
+      });
+      return this.comparator ? tables.sort(this.comparator) : tables;
+    },
+    
+    first: function() {
+      var tables = this.all();
+      return tables.length > 0 ? tables[0] : null;
+    },
+    
+    last: function() {
+      var tables = this.all();
+      return tables.length > 0 ? tables[tables.length - 1] : null;
+    },
+    
+    order: function(comparator) {
+      this.comparator = comparator;
+      return this;
+    },
+  });
+  
+  return Relation_;
 })();
