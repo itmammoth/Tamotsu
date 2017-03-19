@@ -4,13 +4,13 @@ var createRelation_ = function() {
     this.predicates = [];
   };
   
-  Object.assign(Relation_.prototype, {
-    where: function(predicate) {
+  Object.defineProperties(Relation_.prototype, {
+    where: { value: function(predicate) {
       this.predicates.push(predicate);
       return this;
-    },
+    }},
     
-    all: function() {
+    all: { value: function() {
       var tables = [];
       var that = this;
       this.Table.allValues().forEach(function(values, i) {
@@ -23,22 +23,22 @@ var createRelation_ = function() {
         if (passed) tables.push(table);
       });
       return this.comparator ? tables.sort(this.comparator) : tables;
-    },
+    }},
     
-    first: function() {
+    first: { value: function() {
       var tables = this.all();
       return tables.length > 0 ? tables[0] : null;
-    },
+    }},
     
-    last: function() {
+    last: { value: function() {
       var tables = this.all();
       return tables.length > 0 ? tables[tables.length - 1] : null;
-    },
+    }},
     
-    order: function(comparator) {
+    order: { value: function(comparator) {
       this.comparator = comparator;
       return this;
-    },
+    }},
   });
   
   return Relation_;

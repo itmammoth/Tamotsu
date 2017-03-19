@@ -119,10 +119,10 @@ var createTable_ = function(ss) {
   });
   
   Object.defineProperties(Table.prototype, {
-    'save': { value: function() {
+    save: { value: function() {
       this.row ? this.class.update(this) : this.class.create(this);
     }},
-    'destroy': { value: function() {
+    destroy: { value: function() {
       this.class.destroy(this);
     }}
   });
