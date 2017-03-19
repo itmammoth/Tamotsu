@@ -11,28 +11,37 @@ var createRelation_ = function() {
     }},
     
     all: { value: function() {
-      var tables = [];
+      var records = [];
       var that = this;
       this.Table.allValues().forEach(function(values, i) {
-        var table = new that.Table(that.Table.objectFrom(values), { row: i + 2 });
+        var record = new that.Table(that.Table.objectFrom(values), { row: i + 2 });
         var passed = true;
         for (var i = 0; i < that.predicates.length; i++) {
-          passed = passed && that.predicates[i](table);
+          passed = passed && that.predicates[i](record);
           if (!passed) break;
         }
-        if (passed) tables.push(table);
+        if (passed) records.push(record);
       });
-      return this.comparator ? tables.sort(this.comparator) : tables;
+      return this.comparator ? records.sort(this.comparator) : records;
     }},
     
     first: { value: function() {
-      var tables = this.all();
-      return tables.length > 0 ? tables[0] : null;
+      var records = this.all();
+      return records.length > 0 ? records[0] : null;
     }},
     
     last: { value: function() {
-      var tables = this.all();
-      return tables.length > 0 ? tables[tables.length - 1] : null;
+      var records = this.all();
+      return records.length > 0 ? records[records.length - 1] : null;
+    }},
+    
+    pluck: { value: function(column) {
+      var result = [];
+      var that = this;
+      this.all().forEach(function(record) {
+        result.push(record[column]);
+      });
+      return result;
     }},
     
     order: { value: function(comparator) {

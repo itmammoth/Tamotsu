@@ -21,7 +21,7 @@ var createTable_ = function(ss) {
     last: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
-      return new this(this.objectFrom(values[values.length - 1]));
+      return new this(this.objectFrom(values[values.length - 1]), { row: values.length + 1 });
     },
     
     all: function() {
@@ -31,6 +31,15 @@ var createTable_ = function(ss) {
         records.push(new that(that.objectFrom(values)));
       });
       return records;
+    },
+    
+    pluck: function(column) {
+      var result = [];
+      var that = this;
+      this.allValues().forEach(function(values) {
+        result.push(values[that.columnIndexOf(column)]);
+      });
+      return result;
     },
     
     where: function(predicate) {
@@ -49,9 +58,15 @@ var createTable_ = function(ss) {
       }
       return this.columns.memo;
     },
+    
+    columnIndexOf: function(column) {
+      var index = this.columns().indexOf(column);
+      if (index === -1) throw 'Invalid column given!';
+      return index;
+    },
   
     columnABCFor: function(column) {
-      return indexToABC(this.columns().indexOf(column) + 1);
+      return indexToABC(this.columnIndexOf(column) + 1);
     },
     
     dataRange: function() {
@@ -70,10 +85,10 @@ var createTable_ = function(ss) {
       return obj;
     },
     
-    valuesFrom: function(table) {
+    valuesFrom: function(record) {
       var values = [];
       this.columns().forEach(function(c, i) {
-        values.push(table[c]);
+        values.push(record[c] || null);
       });
       return values;
     },
@@ -84,8 +99,8 @@ var createTable_ = function(ss) {
       return allValues;
     },
     
-    create: function(table) {
-      var values = this.valuesFrom(table);
+    create: function(attributes) {
+      var values = this.valuesFrom(attributes);
       var that = this;
       this.withNextId(function(nextId) {
         values[0] = nextId;
@@ -93,13 +108,13 @@ var createTable_ = function(ss) {
       });
     },
     
-    update: function(table) {
-      var values = this.valuesFrom(table);
-      this.rangeByRow(table.row).setValues([values]);
+    update: function(record) {
+      var values = this.valuesFrom(record);
+      this.rangeByRow(record.row).setValues([values]);
     },
     
-    destroy: function(table) {
-      this.sheet.deleteRow(table.row);
+    destroy: function(record) {
+      this.sheet.deleteRow(record.row);
     },
     
     withNextId: function(callback) {
@@ -137,7 +152,7 @@ var createTable_ = function(ss) {
     var Parent = this;
     var Child = function() { return Parent.apply(this, arguments); };
     Object.assign(Child, Parent);
-    Child.prototype = Object.create(Table.prototype);
+    Child.prototype = Object.create(Parent.prototype);
     Object.defineProperties(Child.prototype, {
       'class': { value: Child },
       'constructor': { value: Child }
