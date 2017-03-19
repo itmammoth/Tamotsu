@@ -118,18 +118,13 @@ var createTable_ = function(ss) {
     },
   });
   
-  Object.assign(Table.prototype, {
-    save: function() {
-      if (this.row) {
-        this.class.update(this);
-      } else {
-        this.class.create(this);
-      }
-    },
-    
-    destroy: function() {
+  Object.defineProperties(Table.prototype, {
+    'save': { value: function() {
+      this.row ? this.class.update(this) : this.class.create(this);
+    }},
+    'destroy': { value: function() {
       this.class.destroy(this);
-    },
+    }}
   });
   
   Table.define = function(options) {
@@ -138,12 +133,19 @@ var createTable_ = function(ss) {
       mixin: {},
     }, (options || {}));
     
+    // inherit
     var Parent = this;
     var Child = function() { return Parent.apply(this, arguments); };
+    Object.assign(Child, Parent);
+    Child.prototype = Object.create(Table.prototype);
+    Object.defineProperties(Child.prototype, {
+      'class': { value: Child },
+      'constructor': { value: Child }
+    });
+    for (var name in o.mixin) {
+      Object.defineProperty(Child.prototype, name, { value: o.mixin[name] });
+    }
     
-    Object.assign(Child, Table);
-    Object.assign(Child.prototype, Table.prototype, o.mixin);
-    Child.prototype.class = Child;
     Child.sheet = ss.getSheetByName(o.sheetName);
     Child.idColumn = o.idColumn;
     
