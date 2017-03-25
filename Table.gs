@@ -1,5 +1,5 @@
 var createTable_ = function(ss) {
-  Table = function(attributes, options) {
+  var Table = function(attributes, options) {
     options = (options || {});
     this.row = options.row;
     
@@ -53,10 +53,10 @@ var createTable_ = function(ss) {
     },
     
     columns: function() {
-      if (!this.columns.memo) {
-        this.columns.memo = this.dataRange().offset(0, 0, 1).getValues()[0];
+      if (!this.columns_memo_) {
+        this.columns_memo_ = this.dataRange().offset(0, 0, 1).getValues()[0];
       }
-      return this.columns.memo;
+      return this.columns_memo_;
     },
     
     columnIndexOf: function(column) {
