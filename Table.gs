@@ -1,7 +1,7 @@
 var createTable_ = function(ss) {
   var Table = function(attributes, options) {
     options = (options || {});
-    this.row = options.row;
+    this.row_ = options.row_;
     
     attributes = (attributes || {});
     var that = this;
@@ -15,20 +15,20 @@ var createTable_ = function(ss) {
     first: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
-      return new this(this.objectFrom(values[0]), { row: 2 });
+      return new this(this.objectFrom(values[0]), { row_: 2 });
     },
     
     last: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
-      return new this(this.objectFrom(values[values.length - 1]), { row: values.length + 1 });
+      return new this(this.objectFrom(values[values.length - 1]), { row_: values.length + 1 });
     },
     
     find: function(id) {
       var values = this.allValues();
       for (var i = 0; i < values.length; i++) {
         if (values[i][this.idColumnIndex()] === id) {
-          return new this(this.objectFrom(values[i]), { row: i + 2 });
+          return new this(this.objectFrom(values[i]), { row_: i + 2 });
         }
       }
       throw 'Record not found [id=' + id + ']';
@@ -38,7 +38,7 @@ var createTable_ = function(ss) {
       var records = [];
       var that = this;
       this.allValues().forEach(function(values, i) {
-        records.push(new that(that.objectFrom(values), { row: i + 2 }));
+        records.push(new that(that.objectFrom(values), { row_: i + 2 }));
       });
       return records;
     },
@@ -100,8 +100,8 @@ var createTable_ = function(ss) {
       return this.sheet.getDataRange();
     },
     
-    rangeByRow: function(row) {
-      return this.dataRange().offset(row - 1, 0, 1);
+    rangeByRow: function(row_) {
+      return this.dataRange().offset(row_ - 1, 0, 1);
     },
     
     objectFrom: function(values) {
@@ -137,11 +137,11 @@ var createTable_ = function(ss) {
     
     update: function(record) {
       var values = this.valuesFrom(record);
-      this.rangeByRow(record.row).setValues([values]);
+      this.rangeByRow(record.row_).setValues([values]);
     },
     
     destroy: function(record) {
-      this.sheet.deleteRow(record.row);
+      this.sheet.deleteRow(record.row_);
     },
     
     withNextId: function(callback) {
@@ -170,7 +170,7 @@ var createTable_ = function(ss) {
   
   Object.defineProperties(Table.prototype, {
     save: { value: function() {
-      this.row ? this.class.update(this) : this.class.create(this);
+      this.row_ ? this.class.update(this) : this.class.create(this);
     }},
     destroy: { value: function() {
       this.class.destroy(this);

@@ -14,7 +14,7 @@ var createRelation_ = function() {
       var records = [];
       var that = this;
       this.Table.allValues().forEach(function(values, i) {
-        var record = new that.Table(that.Table.objectFrom(values), { row: i + 2 });
+        var record = new that.Table(that.Table.objectFrom(values), { row_: i + 2 });
         var passed = true;
         for (var i = 0; i < that.predicates.length; i++) {
           passed = passed && that.predicates[i](record);
