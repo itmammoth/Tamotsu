@@ -53,6 +53,14 @@ var createRelation_ = function() {
       return total;
     }},
     
+    max: { value: function(column) {
+      return Math.max.apply(null, this.pluck(column));
+    }},
+    
+    min: { value: function(column) {
+      return Math.min.apply(null, this.pluck(column));
+    }},
+    
     order: { value: function(comparator) {
       this.comparator = comparator;
       return this;

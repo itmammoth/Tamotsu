@@ -61,6 +61,14 @@ var createTable_ = function(ss) {
       return total;
     },
     
+    max: function(column) {
+      return Math.max.apply(null, this.pluck(column));
+    },
+    
+    min: function(column) {
+      return Math.min.apply(null, this.pluck(column));
+    },
+    
     where: function(predicate) {
       var r = new Relation_(this);
       return r.where(predicate);
