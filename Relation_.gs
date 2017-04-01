@@ -44,6 +44,15 @@ var createRelation_ = function() {
       return result;
     }},
     
+    sum: { value: function(column) {
+      var total = 0;
+      var that = this;
+      this.all().forEach(function(record) {
+        total += Number(record[column]);
+      });
+      return total;
+    }},
+    
     order: { value: function(comparator) {
       this.comparator = comparator;
       return this;

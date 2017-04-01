@@ -42,6 +42,15 @@ var createTable_ = function(ss) {
       return result;
     },
     
+    sum: function(column) {
+      var total = 0;
+      var that = this;
+      this.allValues().forEach(function(values) {
+        total += Number(values[that.columnIndexOf(column)]);
+      });
+      return total;
+    },
+    
     where: function(predicate) {
       var r = new Relation_(this);
       return r.where(predicate);
