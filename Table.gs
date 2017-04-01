@@ -24,11 +24,21 @@ var createTable_ = function(ss) {
       return new this(this.objectFrom(values[values.length - 1]), { row: values.length + 1 });
     },
     
+    find: function(id) {
+      var values = this.allValues();
+      for (var i = 0; i < values.length; i++) {
+        if (values[i][this.idColumnIndex()] === id) {
+          return new this(this.objectFrom(values[i]), { row: i + 2 });
+        }
+      }
+      throw 'Record not found [id=' + id + ']';
+    },
+    
     all: function() {
       var records = [];
       var that = this;
-      this.allValues().forEach(function(values) {
-        records.push(new that(that.objectFrom(values)));
+      this.allValues().forEach(function(values, i) {
+        records.push(new that(that.objectFrom(values), { row: i + 2 }));
       });
       return records;
     },
@@ -132,13 +142,21 @@ var createTable_ = function(ss) {
     },
     
     idValues: function() {
-      var colIndex = this.columns().indexOf(this.idColumn);
-      if (colIndex === -1) throw 'Not found id column "' + this.idColumn + '" on ' + this.sheet.getName();
       var idValues = [];
+      var that = this;
       this.allValues().forEach(function(values) {
-        idValues.push(values[colIndex]);
+        idValues.push(values[that.idColumnIndex()]);
       });
       return idValues;
+    },
+    
+    idColumnIndex: function() {
+      if (!this.idColumnIndex_memo_) {
+        var i = this.columns().indexOf(this.idColumn);
+        if (i === -1) throw 'Not found id column "' + this.idColumn + '" on ' + this.sheet.getName();
+        this.idColumnIndex_memo_ = i;
+      }
+      return this.idColumnIndex_memo_;
     },
   });
   
