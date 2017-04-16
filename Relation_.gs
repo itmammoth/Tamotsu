@@ -22,7 +22,9 @@ var createRelation_ = function() {
         }
         if (passed) records.push(record);
       });
-      return this.comparator ? records.sort(this.comparator) : records;
+      
+      if (!this.comparator) return records;
+      return compare(this.comparator, records);
     }},
     
     first: { value: function() {
@@ -87,5 +89,48 @@ var createRelation_ = function() {
     return true;
   };
   
+  var compare = function(comparator, records) {
+    var t = typeof comparator;
+    if (t === 'function') return records.sort(comparator);
+    if (t === 'string') return records.sort(createComparator(comparator));
+    throw 'Invalid order comparator [' + comparator + ']';
+  };
+  
+  var createComparator = function(strComparator) {
+    var funcs = [];
+    strComparator.split(',').forEach(function(part) {
+      var attr, order;
+      [attr, order] = part.trim().split(/\s+(?=(?:asc|desc))/i);
+      order = (order || 'asc');
+      if (order.toLocaleLowerCase() === 'asc') {
+        funcs.push(function(a, b) {
+          if (a[attr] < b[attr]) return -1;
+          if (a[attr] > b[attr]) return  1;
+          return 0;
+        });
+      } else if (order.toLocaleLowerCase() === 'desc') {
+        funcs.push(function(a, b) {
+          if (a[attr] > b[attr]) return -1;
+          if (a[attr] < b[attr]) return  1;
+          return 0;
+        });
+      } else {
+        throw 'Invalid order comparator [' + strComparator + ']';
+      }
+    });
+  
+    return createCombinedComparator(funcs);
+  };
+  
+  var createCombinedComparator = function(comparators) {
+    return function(a, b) {
+      for (var i = 0; i < comparators.length; i++) {
+        var r = comparators[i](a, b);
+        if (r !== 0) return r;
+      }
+      return 0;
+    };
+  };
+
   return Relation_;
 };
