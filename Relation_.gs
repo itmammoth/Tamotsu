@@ -17,7 +17,7 @@ var createRelation_ = function() {
         var record = new that.Table(that.Table.objectFrom(values), { row_: i + 2 });
         var passed = true;
         for (var i = 0; i < that.predicates.length; i++) {
-          passed = passed && that.predicates[i](record);
+          passed = passed && evaluate(that.predicates[i], record);
           if (!passed) break;
         }
         if (passed) records.push(record);
@@ -66,6 +66,26 @@ var createRelation_ = function() {
       return this;
     }},
   });
+  
+  var evaluate = function(predicate, record) {
+    var t = typeof predicate;
+    if (t === 'function') {
+      return predicate(record);
+    } else if (t === 'object') {
+      return evaludateAsObject(predicate, record);
+    } else {
+      throw 'Invalid where condition [' + predicate + ']';
+    }
+  };
+  
+  var evaludateAsObject = function(object, record) {
+    var passed = true;
+    for (var attr in object) {
+      passed = passed && record[attr] === object[attr];
+      if (!passed) return false;
+    }
+    return true;
+  };
   
   return Relation_;
 };
