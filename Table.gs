@@ -134,18 +134,27 @@ var createTable_ = function() {
       return allValues;
     },
     
-    create: function(attributes) {
-      var values = this.valuesFrom(attributes);
-      var that = this;
-      this.withNextId(function(nextId) {
-        values[0] = nextId;
-        that.sheet().getRange(that.sheet().getLastRow() + 1, 1, 1, that.columns().length).setValues([values]);
-      });
+    create: function(recordOrAttributes) {
+      var record = recordOrAttributes.class ? recordOrAttributes : new this(recordOrAttributes);
+      if (record.validate('create')) {
+        var values = this.valuesFrom(record);
+        var that = this;
+        this.withNextId(function(nextId) {
+          values[0] = nextId;
+          that.sheet().getRange(that.sheet().getLastRow() + 1, 1, 1, that.columns().length).setValues([values]);
+        });
+        return true;
+      }
+      return false;
     },
     
     update: function(record) {
-      var values = this.valuesFrom(record);
-      this.rangeByRow(record.row_).setValues([values]);
+      if (record.validate('update')) {
+        var values = this.valuesFrom(record);
+        this.rangeByRow(record.row_).setValues([values]);
+        return true;
+      }
+      return false;
     },
     
     destroy: function(record) {
@@ -178,13 +187,17 @@ var createTable_ = function() {
   
   Object.defineProperties(Table.prototype, {
     save: { value: function() {
-      if (typeof this.validate === 'function') this.validate();
-      if (Object.keys(this.errors).length > 0) return false;
-      this.row_ ? this.class.update(this) : this.class.create(this);
-      return true;
+      this.errors = {};
+      var updateOrCreate = this.row_ ? 'update' : 'create';
+      this.class[updateOrCreate](this);
+      return (Object.keys(this.errors).length === 0) ? true : false;
     }},
     destroy: { value: function() {
       this.class.destroy(this);
+    }},
+    validate: { value: function(on) {
+      // override it if you need
+      return true;
     }},
   });
   
