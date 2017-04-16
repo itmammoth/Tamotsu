@@ -1,7 +1,8 @@
-var createTable_ = function(ss) {
+var createTable_ = function() {
   var Table = function(attributes, options) {
     options = (options || {});
     this.row_ = options.row_;
+    this.errors = {};
     
     attributes = (attributes || {});
     var that = this;
@@ -11,6 +12,13 @@ var createTable_ = function(ss) {
   };
   
   Object.assign(Table, {
+  
+    sheet: function() {
+      if (!this.sheet_memo_) {
+        this.sheet_memo_ = ss_.getSheetByName(this.sheetName);
+      }
+      return this.sheet_memo_;
+    },
   
     first: function() {
       var values = this.allValues();
@@ -97,7 +105,7 @@ var createTable_ = function(ss) {
     },
     
     dataRange: function() {
-      return this.sheet.getDataRange();
+      return this.sheet().getDataRange();
     },
     
     rangeByRow: function(row_) {
@@ -131,7 +139,7 @@ var createTable_ = function(ss) {
       var that = this;
       this.withNextId(function(nextId) {
         values[0] = nextId;
-        that.sheet.getRange(that.sheet.getLastRow() + 1, 1, 1, that.columns().length).setValues([values]);
+        that.sheet().getRange(that.sheet().getLastRow() + 1, 1, 1, that.columns().length).setValues([values]);
       });
     },
     
@@ -141,7 +149,7 @@ var createTable_ = function(ss) {
     },
     
     destroy: function(record) {
-      this.sheet.deleteRow(record.row_);
+      this.sheet().deleteRow(record.row_);
     },
     
     withNextId: function(callback) {
@@ -161,7 +169,7 @@ var createTable_ = function(ss) {
     idColumnIndex: function() {
       if (!this.idColumnIndex_memo_) {
         var i = this.columns().indexOf(this.idColumn);
-        if (i === -1) throw 'Not found id column "' + this.idColumn + '" on ' + this.sheet.getName();
+        if (i === -1) throw 'Not found id column "' + this.idColumn + '" on ' + this.sheet().getName();
         this.idColumnIndex_memo_ = i;
       }
       return this.idColumnIndex_memo_;
@@ -170,20 +178,17 @@ var createTable_ = function(ss) {
   
   Object.defineProperties(Table.prototype, {
     save: { value: function() {
+      if (typeof this.validate === 'function') this.validate();
+      if (Object.keys(this.errors).length > 0) return false;
       this.row_ ? this.class.update(this) : this.class.create(this);
+      return true;
     }},
     destroy: { value: function() {
       this.class.destroy(this);
-    }}
+    }},
   });
   
-  Table.define = function(options) {
-    var o = Object.assign({
-      idColumn: '#',
-      mixin: {},
-    }, (options || {}));
-    
-    // inherit
+  Table.define = function(classProps, instanceProps) {
     var Parent = this;
     var Child = function() { return Parent.apply(this, arguments); };
     Object.assign(Child, Parent);
@@ -192,12 +197,11 @@ var createTable_ = function(ss) {
       'class': { value: Child },
       'constructor': { value: Child }
     });
-    for (var name in o.mixin) {
-      Object.defineProperty(Child.prototype, name, { value: o.mixin[name] });
+    for (var name in instanceProps) {
+      Object.defineProperty(Child.prototype, name, { value: instanceProps[name] });
     }
     
-    Child.sheet = ss.getSheetByName(o.sheetName);
-    Child.idColumn = o.idColumn;
+    Object.assign(Child, Object.assign({ idColumn: '#' }, classProps));
     
     return Child;
   };

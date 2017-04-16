@@ -1,3 +1,4 @@
+var ss_;
 var Table;
 var Relation_;
 var callbacks_ = [];
@@ -9,7 +10,8 @@ var callbacks_ = [];
  *                                  When not given, SpreadsheetApp.getActive() is used.
  */
 function initialize(spreadsheet) {
-  Table = createTable_(spreadsheet || SpreadsheetApp.getActive());
+  ss_ = spreadsheet || SpreadsheetApp.getActive();
+  Table = createTable_();
   Relation_ = createRelation_();
   callbacks_.forEach(function(callback) {
     callback(spreadsheet);
