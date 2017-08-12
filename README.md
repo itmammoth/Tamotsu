@@ -207,7 +207,7 @@ Returns the summed up number of the given column's values.
 |:-----|:-----|:----------|
 |column|string|a column name to sum up|
 ```javascript
-var total = Agent.pluck('Salary');
+var total = Agent.sum('Salary');
 Logger.log(total); //=> 600
 ```
 
