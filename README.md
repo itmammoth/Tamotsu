@@ -231,7 +231,7 @@ Returns the minimum value of the given column's values.
 |:-----|:-----|:----------|
 |column|string|a column name to examine|
 ```javascript
-var min = Agent.max('Salary');
+var min = Agent.min('Salary');
 Logger.log(min); //=> 100
 ```
 
