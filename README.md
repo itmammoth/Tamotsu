@@ -1,6 +1,6 @@
 # Tamotsu
 
-Tamotsu is an object-spreadsheet mapping libary like ActiveRecord for google apps script.
+Tamotsu(保つ) is an object-spreadsheet mapping libary like ActiveRecord for google apps script.
 
 ![Agents](https://raw.githubusercontent.com/itmammoth/Tamotsu/master/images/Agents001.png "Agents")
 
@@ -235,8 +235,142 @@ var min = Agent.min('Salary');
 Logger.log(min); //=> 100
 ```
 
-### `Tamotsu.Table.where(predicate)`
+### `Tamotsu.Table.where(conditions)`
+
+Returns the relation object which meets the given conditions.
+
+|Param     |Type              |Description|
+|:---------|:-----------------|:----------|
+|conditions|object or function|a condition object or predicate function|
+
+```javascript
+// Object condition
+var men = Agent.where({ Gender: 'Male' }).all();
+Logger.log(men); //=> [{#=1.0, First Name=Charles...}, {#=3.0, First Name=John...}
+
+// Function condition
+var highPay = Agent.where(function(agent) { return agent['Salary'] > 150; })
+                   .all();
+Logger.log(highPay); //=> [{#=2.0, First Name=Sarah...}, {#=3.0, First Name=John...}]
+```
+
+For sure `where` returns not models but a relation object that is to be chained with other scope functions, so you can get the records in such an elegant way.
+
+```javascript
+Agent.where(condition1).where(condition2).order(comparator).all();
+```
 
 ### `Tamotsu.Table.order(comparator)`
 
-### `Tamotsu.Table.create(attributes)`
+Returns the relation object which meets the given sort order.
+
+|Param     |Type              |Description|
+|:---------|:-----------------|:----------|
+|comparator|string or function|a column name or comparator function|
+
+```javascript
+// Object comparator
+var asc = Agent.order('Salary').all();
+Logger.log(asc); //=> [{#=1.0, Salary=100...}, {#=3.0, Salary=200...}, {#=2.0, Salary=300}]
+
+// Supports ASC/DESC
+var desc = Agent.order('Salary DESC').all();
+Logger.log(desc); //=> [{#=2.0, Salary=300...}, {#=3.0, Salary=200...}, {#=1.0, Salary=100}]
+
+// Function comparator
+Agent.order(function(agent1, agent2) {
+  // complex comparator
+  return agent1
+}).all();
+
+```
+
+### `Tamotsu.Table.create(model_or_attributes)`
+
+Creates new record in the spreadsheet with the given model or attributes.
+
+|Param              |Type           |Description|
+|:------------------|:--------------|:----------|
+|model_or_attributes|model or object|Tamotsu.Table model or attribtues object|
+
+```javascript
+var agent = new Agent({
+  'First Name': 'Morgan',
+  'Last Name': 'Grimes',
+  'Gender': 'Male',
+  'Salary': 50,
+});
+Agent.create(agent); //=> {#=4.0, First Name=Morgan, ...}
+                     // and the data will be appended to the sheet.
+// or
+Agent.create({
+  'First Name': 'Morgan',
+  'Last Name': 'Grimes',
+  'Gender': 'Male',
+  'Salary': 50,
+});
+```
+
+## Tamotsu.Model
+
+### `Tamotsu.Model.save()`
+
+Creates or updates on the spreadsheet with the model attributes.
+
+```javascript
+// Creates
+var newAgent = new Agent({
+  'First Name': 'Morgan',
+  'Last Name': 'Grimes',
+  'Gender': 'Male',
+  'Salary': 50,
+});
+newAgent.save(); // The data will be appended to the last of the sheet.
+
+// Updates
+var agent = Agent.last();
+agent['Salary'] = 10;
+agent.save(); // The data on the sheet will be updated.
+```
+
+### `Tamotsu.Model.destroy()`
+
+Delete the model away from the spreadsheet.
+
+```javascript
+var fired = Agent.first();
+fired.destroy(); // The data will be removed away from the sheet.
+```
+
+### `Tamotsu.Model.isValid()`
+
+Returns boolean of the model being valid/invalid.
+
+```javascript
+Tamotsu.initialize();
+var Agent = Tamotsu.Table.define({ sheetName: 'Agents' }, {
+  validate: function(on) {
+    if (!this['First Name']) {
+      this.errors['First Name'] = "can't be blank";
+    }
+  },
+});
+
+var agent = new Agent();
+Logger.log(agent.isValid()); //=> false
+
+agent['First Name'] = 'Morgan';
+Logger.log(agent.isValid()); //=> true
+```
+
+### `Tamotsu.Model.isNewRecord()`
+
+Returns boolean of the model being new record or not.
+
+```javascript
+var agent = new Agent();
+Logger.log(agent.isNewRecord()); //=> true
+
+agent = Agent.first();
+Logger.log(agent.isNewRecord()); //=> false
+```
