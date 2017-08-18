@@ -374,3 +374,13 @@ Logger.log(agent.isNewRecord()); //=> true
 agent = Agent.first();
 Logger.log(agent.isNewRecord()); //=> false
 ```
+
+# Test
+
+Here is the specs.
+
+https://github.com/itmammoth/Tamotsu_Test
+
+# Licence
+
+MIT Licence.
