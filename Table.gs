@@ -162,7 +162,8 @@ var createTable_ = function() {
     },
     
     withNextId: function(callback) {
-      var nextId = Math.max.apply(null, this.idValues()) + 1;
+	  var ids = this.idValues();
+      var nextId = ids.length > 0 ? Math.max.apply(null, ids) + 1 : 1;
       callback(nextId);
     },
     
