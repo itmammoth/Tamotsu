@@ -2,7 +2,6 @@ var createTable_ = function() {
   var Table = function(attributes, options) {
     options = (options || {});
     this.row_ = options.row_;
-    this.errors = {};
     
     attributes = (attributes || {});
     var that = this;
@@ -135,21 +134,24 @@ var createTable_ = function() {
     },
     
     create: function(recordOrAttributes) {
-      var record = recordOrAttributes.class ? recordOrAttributes : new this(recordOrAttributes);
-      if (record.validate('create')) {
+      var record = recordOrAttributes.class === this ? recordOrAttributes : new this(recordOrAttributes);
+      delete record.row_;
+      if (record.isValid()) {
         var values = this.valuesFrom(record);
         var that = this;
         this.withNextId(function(nextId) {
-          values[0] = nextId;
-          that.sheet().getRange(that.sheet().getLastRow() + 1, 1, 1, that.columns().length).setValues([values]);
+          values[that.idColumnIndex()] = nextId;
+          var row = that.sheet().getLastRow() + 1;
+          that.sheet().getRange(row, 1, 1, that.columns().length).setValues([values]);
+          record.row_ = row;
         });
-        return true;
+        return record;
       }
       return false;
     },
     
     update: function(record) {
-      if (record.validate('update')) {
+      if (record.isValid()) {
         var values = this.valuesFrom(record);
         this.rangeByRow(record.row_).setValues([values]);
         return true;
@@ -162,7 +164,8 @@ var createTable_ = function() {
     },
     
     withNextId: function(callback) {
-      var nextId = Math.max.apply(null, this.idValues()) + 1;
+      var ids = this.idValues();
+      var nextId = ids.length > 0 ? Math.max.apply(null, ids) + 1 : 1;
       callback(nextId);
     },
     
@@ -188,16 +191,22 @@ var createTable_ = function() {
   Object.defineProperties(Table.prototype, {
     save: { value: function() {
       this.errors = {};
-      var updateOrCreate = this.row_ ? 'update' : 'create';
-      this.class[updateOrCreate](this);
-      return (Object.keys(this.errors).length === 0) ? true : false;
+      var updateOrCreate = this.isNewRecord() ? 'create' : 'update';
+      return this.class[updateOrCreate](this);
     }},
     destroy: { value: function() {
       this.class.destroy(this);
     }},
     validate: { value: function(on) {
       // override it if you need
-      return true;
+    }},
+    isValid: { value: function() {
+      this.errors = {};
+      this.validate(this.isNewRecord() ? 'create' : 'update');
+      return noKeys(this.errors);
+    }},
+    isNewRecord: { value: function() {
+      return !this.row_;
     }},
   });
   
@@ -231,6 +240,10 @@ var createTable_ = function() {
       n = Math.floor(n / len) - 1;
     }
     return s;
+  };
+  
+  var noKeys = function(object) {
+    return Object.keys(object || {}).length === 0;
   };
   
   return Table;
