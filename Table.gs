@@ -122,7 +122,7 @@ var createTable_ = function() {
     valuesFrom: function(record) {
       var values = [];
       this.columns().forEach(function(c, i) {
-        values.push(record[c] || null);
+        values.push((record[c] == null || record[c] == undefined)? null : record[c]);
       });
       return values;
     },
@@ -164,7 +164,7 @@ var createTable_ = function() {
     },
     
     withNextId: function(callback) {
-      var ids = this.idValues();
+	  var ids = this.idValues();
       var nextId = ids.length > 0 ? Math.max.apply(null, ids) + 1 : 1;
       callback(nextId);
     },
