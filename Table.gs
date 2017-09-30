@@ -122,7 +122,7 @@ var createTable_ = function() {
     valuesFrom: function(record) {
       var values = [];
       this.columns().forEach(function(c, i) {
-        values.push((record[c] == null || record[c] == undefined)? null : record[c]);
+        values.push(record[c] == undefined ? null : record[c]);
       });
       return values;
     },
