@@ -144,6 +144,7 @@ var createTable_ = function() {
           var row = that.sheet().getLastRow() + 1;
           that.sheet().getRange(row, 1, 1, that.columns().length).setValues([values]);
           record.row_ = row;
+		  record[that.idColumn] = nextId;
         });
         return record;
       }
