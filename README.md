@@ -280,7 +280,7 @@ Logger.log(desc); //=> [{#=2.0, Salary=300...}, {#=3.0, Salary=200...}, {#=1.0, 
 // Function comparator
 Agent.order(function(agent1, agent2) {
   // complex comparator
-  return agent1
+  return agent2['First Name'].length - agent1['First Name'].length;
 }).all();
 
 ```
