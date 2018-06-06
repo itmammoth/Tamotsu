@@ -112,7 +112,7 @@ Returns a table class extended from `Tamotsu.Table`.
 |Key                      |Type  |Description|
 |:------------------------|:-----|:----------|
 |__sheetName__ (necessary)|string|A sheet name you will use as a table|
-|idColumn                 |string|Id column used as a key (Default: '#')|
+|idColumn                 |string|Id column used as a key **(Default: '#')**|
 
 #### Prepared `instanceProperties`
 |Key     |Type    |Description|
