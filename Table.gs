@@ -5,7 +5,7 @@ var createTable_ = function() {
     
     attributes = (attributes || {});
     var that = this;
-    this.class.columns().forEach(function(c) {
+    this.__class.columns().forEach(function(c) {
       that[c] = attributes[c];
     });
   };
@@ -134,7 +134,7 @@ var createTable_ = function() {
     },
     
     create: function(recordOrAttributes) {
-      var record = recordOrAttributes.class === this ? recordOrAttributes : new this(recordOrAttributes);
+      var record = recordOrAttributes.__class === this ? recordOrAttributes : new this(recordOrAttributes);
       delete record.row_;
       if (record.isValid()) {
         var values = this.valuesFrom(record);
@@ -193,10 +193,10 @@ var createTable_ = function() {
     save: { value: function() {
       this.errors = {};
       var updateOrCreate = this.isNewRecord() ? 'create' : 'update';
-      return this.class[updateOrCreate](this);
+      return this.__class[updateOrCreate](this);
     }},
     destroy: { value: function() {
-      this.class.destroy(this);
+      this.__class.destroy(this);
     }},
     validate: { value: function(on) {
       // override it if you need
@@ -217,7 +217,7 @@ var createTable_ = function() {
     Object.assign(Child, Parent);
     Child.prototype = Object.create(Parent.prototype);
     Object.defineProperties(Child.prototype, {
-      'class': { value: Child },
+      '__class': { value: Child },
       'constructor': { value: Child }
     });
     for (var name in instanceProps) {
