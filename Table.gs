@@ -136,19 +136,29 @@ var createTable_ = function() {
     create: function(recordOrAttributes) {
       var record = recordOrAttributes.__class === this ? recordOrAttributes : new this(recordOrAttributes);
       delete record.row_;
-      if (record.isValid()) {
-        var values = this.valuesFrom(record);
-        var that = this;
+      
+      if (!record.isValid()) return false;
+      
+      var that = this;
+      
+      var appendRow = function(values) {
+        var row = that.sheet().getLastRow() + 1;
+        that.sheet().getRange(row, 1, 1, that.columns().length).setValues([values]);
+        record.row_ = row;
+      };
+      
+      var values = this.valuesFrom(record);
+      if (record[this.idColumn]) {
+        appendRow(values);
+      } else {
         this.withNextId(function(nextId) {
           values[that.idColumnIndex()] = nextId;
-          var row = that.sheet().getLastRow() + 1;
-          that.sheet().getRange(row, 1, 1, that.columns().length).setValues([values]);
-          record.row_ = row;
+          appendRow(values);
           record[that.idColumn] = nextId;
         });
-        return record;
       }
-      return false;
+      
+      return record;
     },
     
     update: function(record) {
