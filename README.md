@@ -109,18 +109,11 @@ Returns a table class extended from `Tamotsu.Table`.
 |instanceProperties (optional)|object|An object that is to be defined on your table class's instance as instance properties|
 
 #### Prepared `classProperties`
-<<<<<<< HEAD
 |Key                      |Type   |Description|
 |:------------------------|:------|:----------|
 |__sheetName__ (necessary)|string |A sheet name you will use as a table|
 |idColumn                 |string |Id column used as a key (Default: '#')|
 |autoIncrement            |boolean|If true, id is automatically incremented when its value is blank (Default: true)|
-=======
-|Key                      |Type  |Description|
-|:------------------------|:-----|:----------|
-|__sheetName__ (necessary)|string|A sheet name you will use as a table|
-|idColumn                 |string|Id column used as a key **(Default: '#')**|
->>>>>>> b6f250e1a8205089daca8371a81feaf19131c09a
 
 #### Prepared `instanceProperties`
 |Key     |Type    |Description|
