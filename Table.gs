@@ -213,6 +213,9 @@ var createTable_ = function() {
     }},
     isValid: { value: function() {
       this.errors = {};
+      if (!this.__class.autoIncrement && isBlank(this[this.__class.idColumn])) {
+        this.errors[this.__class.idColumn] = "can't be blank";
+      }
       this.validate(this.isNewRecord() ? 'create' : 'update');
       return noKeys(this.errors);
     }},
@@ -234,7 +237,10 @@ var createTable_ = function() {
       Object.defineProperty(Child.prototype, name, { value: instanceProps[name] });
     }
     
-    Object.assign(Child, Object.assign({ idColumn: '#' }, classProps));
+    Object.assign(Child, Object.assign({
+      idColumn: '#',
+      autoIncrement: true,
+    }, classProps));
     
     return Child;
   };
@@ -255,6 +261,10 @@ var createTable_ = function() {
   
   var noKeys = function(object) {
     return Object.keys(object || {}).length === 0;
+  };
+  
+  var isBlank = function(value) {
+    return typeof value === 'undefined' || value === null || String(value).trim() === '';
   };
   
   return Table;
