@@ -5,7 +5,7 @@ var createTable_ = function() {
     
     attributes = (attributes || {});
     var that = this;
-    this.class.columns().forEach(function(c) {
+    this.__class.columns().forEach(function(c) {
       that[c] = attributes[c];
     });
   };
@@ -134,21 +134,31 @@ var createTable_ = function() {
     },
     
     create: function(recordOrAttributes) {
-      var record = recordOrAttributes.class === this ? recordOrAttributes : new this(recordOrAttributes);
+      var record = recordOrAttributes.__class === this ? recordOrAttributes : new this(recordOrAttributes);
       delete record.row_;
-      if (record.isValid()) {
-        var values = this.valuesFrom(record);
-        var that = this;
+      
+      if (!record.isValid()) return false;
+      
+      var that = this;
+      
+      var appendRow = function(values) {
+        var row = that.sheet().getLastRow() + 1;
+        that.sheet().getRange(row, 1, 1, that.columns().length).setValues([values]);
+        record.row_ = row;
+      };
+      
+      var values = this.valuesFrom(record);
+      if (record[this.idColumn]) {
+        appendRow(values);
+      } else {
         this.withNextId(function(nextId) {
           values[that.idColumnIndex()] = nextId;
-          var row = that.sheet().getLastRow() + 1;
-          that.sheet().getRange(row, 1, 1, that.columns().length).setValues([values]);
-          record.row_ = row;
+          appendRow(values);
           record[that.idColumn] = nextId;
         });
-        return record;
       }
-      return false;
+      
+      return record;
     },
     
     update: function(record) {
@@ -193,16 +203,19 @@ var createTable_ = function() {
     save: { value: function() {
       this.errors = {};
       var updateOrCreate = this.isNewRecord() ? 'create' : 'update';
-      return this.class[updateOrCreate](this);
+      return this.__class[updateOrCreate](this);
     }},
     destroy: { value: function() {
-      this.class.destroy(this);
+      this.__class.destroy(this);
     }},
     validate: { value: function(on) {
       // override it if you need
     }},
     isValid: { value: function() {
       this.errors = {};
+      if (!this.__class.autoIncrement && isBlank(this[this.__class.idColumn])) {
+        this.errors[this.__class.idColumn] = "can't be blank";
+      }
       this.validate(this.isNewRecord() ? 'create' : 'update');
       return noKeys(this.errors);
     }},
@@ -217,14 +230,17 @@ var createTable_ = function() {
     Object.assign(Child, Parent);
     Child.prototype = Object.create(Parent.prototype);
     Object.defineProperties(Child.prototype, {
-      'class': { value: Child },
+      '__class': { value: Child },
       'constructor': { value: Child }
     });
     for (var name in instanceProps) {
       Object.defineProperty(Child.prototype, name, { value: instanceProps[name] });
     }
     
-    Object.assign(Child, Object.assign({ idColumn: '#' }, classProps));
+    Object.assign(Child, Object.assign({
+      idColumn: '#',
+      autoIncrement: true,
+    }, classProps));
     
     return Child;
   };
@@ -245,6 +261,10 @@ var createTable_ = function() {
   
   var noKeys = function(object) {
     return Object.keys(object || {}).length === 0;
+  };
+  
+  var isBlank = function(value) {
+    return typeof value === 'undefined' || value === null || String(value).trim() === '';
   };
   
   return Table;
