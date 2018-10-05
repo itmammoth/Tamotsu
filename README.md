@@ -288,7 +288,7 @@ Agent.order(function(agent1, agent2) {
 
 ### `Tamotsu.Table.create(model_or_attributes)`
 
-Creates new record in the spreadsheet with the given model or attributes.
+Creates new record in the spreadsheet with the given model or attributes and returns the new model if created successfully.
 
 |Param              |Type           |Description|
 |:------------------|:--------------|:----------|
@@ -336,7 +336,7 @@ agent.save(); // The data on the sheet will be updated.
 
 ### `Tamotsu.Model.updateAttributes(attributes)`
 
-Updates model and spreadsheet with the given attributes.
+Updates model and spreadsheet with the given attributes and returns true if updated successfully.
 
 |Param     |Type  |Description|
 |:---------|:-----|:----------|
