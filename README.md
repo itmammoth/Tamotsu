@@ -334,6 +334,20 @@ agent['Salary'] = 10;
 agent.save(); // The data on the sheet will be updated.
 ```
 
+### `Tamotsu.Model.updateAttributes(attributes)`
+
+Updates model and spreadsheet with the given attributes.
+
+|Param     |Type  |Description|
+|:---------|:-----|:----------|
+|attributes|object|attribtues object (column to value)|
+
+```javascript
+var agent = Agent.first();
+agent.updateAttributes({ 'First Name': 'Chuck', 'Salary': 500 }); // The data on the sheet will be updated.
+Logger.log(agent); //=>  {#=1.0, First Name=Chuck, Last Name=Bartowski, Gender=Male, Salary=500.0, ...}
+```
+
 ### `Tamotsu.Model.destroy()`
 
 Delete the model away from the spreadsheet.

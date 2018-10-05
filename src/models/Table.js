@@ -205,6 +205,15 @@ var createTable_ = function() {
       var updateOrCreate = this.isNewRecord() ? 'create' : 'update';
       return this.__class[updateOrCreate](this);
     }},
+    updateAttributes: { value: function(attributes) {
+      var that = this;
+      this.__class.columns().forEach(function(c, i) {
+        if (c in attributes) {
+          that[c] = attributes[c];
+        }
+      });
+      return this.save();
+    }},
     destroy: { value: function() {
       this.__class.destroy(this);
     }},
