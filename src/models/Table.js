@@ -148,7 +148,7 @@ var createTable_ = function() {
       };
       
       var values = this.valuesFrom(record);
-      if (record[this.idColumn]) {
+      if (isPresent(record[this.idColumn])) {
         appendRow(values);
       } else {
         this.withNextId(function(nextId) {
@@ -282,6 +282,10 @@ var createTable_ = function() {
   
   var isBlank = function(value) {
     return typeof value === 'undefined' || value === null || String(value).trim() === '';
+  };
+  
+  var isPresent = function(value) {
+    return typeof value !== 'undefined' && value !== null && String(value) !== '';
   };
   
   return Table;
