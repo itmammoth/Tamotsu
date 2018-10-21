@@ -390,13 +390,13 @@ agent = Agent.first();
 Logger.log(agent.isNewRecord()); //=> false
 ```
 
-### `Tamotsu.Model.attributes()`
+### `Tamotsu.Model.getAttributes()`
 
 Returns an object of the model attributes. (column to value)
 
 ```javascript
 var agent = new Agent();
-Logger.log(agent.attributes()); //=> {'#': 1, 'First Name': 'Charles', 'Last Name': 'Bartowski', ...}
+Logger.log(agent.getAttributes()); //=> {'#': 1, 'First Name': 'Charles', 'Last Name': 'Bartowski', ...}
 ```
 
 # Test

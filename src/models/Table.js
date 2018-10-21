@@ -231,7 +231,7 @@ var createTable_ = function() {
     isNewRecord: { value: function() {
       return !this.row_;
     }},
-    attributes: { value: function() {
+    getAttributes: { value: function() {
       var obj = {};
       var that = this;
       this.__class.columns().forEach(function (c, i) {
