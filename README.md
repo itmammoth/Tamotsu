@@ -312,6 +312,38 @@ Agent.create({
 });
 ```
 
+### `Tamotsu.Table.createOrUpdate(model_or_attributes)`
+
+[with NOT existing id] Creates new record in the spreadsheet with the given model or attributes and returns the new model if created successfully.
+
+[with existing id] Updates existing record in the spreadsheet with the given model or attributes and returns true if updated successfully.
+
+|Param              |Type           |Description|
+|:------------------|:--------------|:----------|
+|model_or_attributes|model or object|Tamotsu.Table model or attribtues object|
+
+```javascript
+var agent = new Agent({
+  '#': '999',
+  'First Name': 'Morgan',
+  'Last Name': 'Grimes',
+  'Gender': 'Male',
+  'Salary': 50,
+});
+// If there is no record with id=999, the data will be appended to the sheet. Otherwise, the row with id=999 will be updated with the given data.
+Agent.createOrUpdate(agent);  //=> {#=999.0, First Name=Morgan, ...}
+
+// with attributes
+Agent.createOrUpdate({
+  '#': '999',
+  'First Name': 'Morgan',
+  'Last Name': 'Grimes',
+  'Gender': 'Male',
+  'Salary': 50,
+});
+```
+
+
 ## Tamotsu.Model
 
 ### `Tamotsu.Model.save()`
@@ -397,6 +429,19 @@ Returns an object of the model attributes. (column to value)
 ```javascript
 var agent = new Agent();
 Logger.log(agent.getAttributes()); //=> {'#': 1, 'First Name': 'Charles', 'Last Name': 'Bartowski', ...}
+```
+
+### `Tamotsu.Model.setAttributes()`
+
+Set attributes to a model.
+
+|Param     |Type  |Description|
+|:---------|:-----|:----------|
+|attributes|object|attribtues object (column to value)|
+
+```javascript
+var agent = Agent.first();
+agent.setAttributes({ 'First Name': 'Morgan', 'Last Name': 'Grimes' });
 ```
 
 # Test

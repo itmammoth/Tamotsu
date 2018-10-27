@@ -161,13 +161,34 @@ var createTable_ = function() {
       return record;
     },
     
-    update: function(record) {
+    update: function(recordOrAttributes) {
+      var record = this.find(recordOrAttributes[this.idColumn]);
+      record.setAttributes(recordOrAttributes);
+      if (recordOrAttributes.__class === this) {
+        recordOrAttributes.row_ = record.row_;
+      }
+
       if (record.isValid()) {
         var values = this.valuesFrom(record);
         this.rangeByRow(record.row_).setValues([values]);
         return true;
       }
       return false;
+    },
+
+    createOrUpdate: function(recordOrAttributes) {
+      var id = recordOrAttributes[this.idColumn];
+      if (isPresent(id)) {
+        var condition = {};
+        condition[this.idColumn] = id;
+        if (this.where(condition).first()) {
+          return this.update(recordOrAttributes);
+        } else {
+          return this.create(recordOrAttributes);
+        }
+      } else {
+        return this.create(recordOrAttributes);
+      }
     },
     
     destroy: function(record) {
@@ -238,6 +259,12 @@ var createTable_ = function() {
         obj[c] = typeof that[c] === 'undefined' ? null : that[c];
       });
       return obj;
+    }},
+    setAttributes: { value: function(attributes) {
+      var that = this;
+      this.__class.columns().forEach(function (c, i) {
+        that[c] = typeof attributes[c] === 'undefined' ? null : attributes[c];
+      });
     }},
   });
   
