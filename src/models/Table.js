@@ -218,7 +218,7 @@ var createTable_ = function() {
     },
 
     withNextId: function(callback) {
-      var ids = this.idValues();
+	  var ids = this.idValues();
       var nextId = ids.length > 0 ? Math.max.apply(null, ids) + 1 : 1;
       callback(nextId);
     },
@@ -244,50 +244,50 @@ var createTable_ = function() {
 
   Object.defineProperties(Table.prototype, {
     save: { value: function() {
-        this.errors = {};
-        var updateOrCreate = this.isNewRecord() ? 'create' : 'update';
-        return this.__class[updateOrCreate](this);
-      }},
+      this.errors = {};
+      var updateOrCreate = this.isNewRecord() ? 'create' : 'update';
+      return this.__class[updateOrCreate](this);
+    }},
     updateAttributes: { value: function(attributes) {
-        var that = this;
-        this.__class.columns().forEach(function(c, i) {
-          if (c in attributes) {
-            that[c] = attributes[c];
-          }
-        });
-        return this.save();
-      }},
-    destroy: { value: function() {
-        this.__class.destroy(this);
-      }},
-    validate: { value: function(on) {
-        // override it if you need
-      }},
-    isValid: { value: function() {
-        this.errors = {};
-        if (!this.__class.autoIncrement && isBlank(this[this.__class.idColumn])) {
-          this.errors[this.__class.idColumn] = "can't be blank";
+      var that = this;
+      this.__class.columns().forEach(function(c, i) {
+        if (c in attributes) {
+          that[c] = attributes[c];
         }
-        this.validate(this.isNewRecord() ? 'create' : 'update');
-        return noKeys(this.errors);
-      }},
+      });
+      return this.save();
+    }},
+    destroy: { value: function() {
+      this.__class.destroy(this);
+    }},
+    validate: { value: function(on) {
+      // override it if you need
+    }},
+    isValid: { value: function() {
+      this.errors = {};
+      if (!this.__class.autoIncrement && isBlank(this[this.__class.idColumn])) {
+        this.errors[this.__class.idColumn] = "can't be blank";
+      }
+      this.validate(this.isNewRecord() ? 'create' : 'update');
+      return noKeys(this.errors);
+    }},
     isNewRecord: { value: function() {
-        return !this.row_;
-      }},
+      return !this.row_;
+    }},
     getAttributes: { value: function() {
-        var obj = {};
-        var that = this;
-        this.__class.columns().forEach(function (c, i) {
-          obj[c] = typeof that[c] === 'undefined' ? null : that[c];
-        });
-        return obj;
-      }},
+      var obj = {};
+      var that = this;
+      this.__class.columns().forEach(function (c, i) {
+        obj[c] = typeof that[c] === 'undefined' ? null : that[c];
+      });
+      return obj;
+    }},
     setAttributes: { value: function(attributes) {
-        var that = this;
-        this.__class.columns().forEach(function (c, i) {
-          that[c] = typeof attributes[c] === 'undefined' ? null : attributes[c];
-        });
-      }},
+      var that = this;
+      this.__class.columns().forEach(function (c, i) {
+        that[c] = typeof attributes[c] === 'undefined' ? null : attributes[c];
+      });
+    }},
   });
 
   Table.define = function(classProps, instanceProps) {
