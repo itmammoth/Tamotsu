@@ -114,6 +114,8 @@ Returns a table class extended from `Tamotsu.Table`.
 |__sheetName__ (necessary)|string |A sheet name you will use as a table|
 |idColumn                 |string |Id column used as a key (Default: '#')|
 |autoIncrement            |boolean|If true, id is automatically incremented when its value is blank (Default: true)|
+|rowShift                 |number |Number of rows before the start of the table  (Default: 0)|
+|columnShift              |number |Number of columns before the start of the table (Default: 0)|
 
 #### Prepared `instanceProperties`
 |Key     |Type    |Description|
@@ -144,6 +146,8 @@ var Agent = Tamotsu.Table.define({
   sheetName: 'Agents2',
   idColumn: 'Agent No', // the column used as id
   aClassProp: 'A class property',
+  rowShift: 1,
+  columnShift: 0,
 }, {
   // instanceProperties
   isMale: function() {
@@ -442,6 +446,42 @@ Set attributes to a model.
 ```javascript
 var agent = Agent.first();
 agent.setAttributes({ 'First Name': 'Morgan', 'Last Name': 'Grimes' });
+```
+
+### `Tamotsu.Model.getFirstRowCoordinate()`
+
+Get first row coordinate.
+
+```javascript
+var agent = Tamotsu.Table.define({ sheetName: 'Agents' });
+Logger.log(agent.getFirstRowCoordinate());
+```
+
+### `Tamotsu.Model.getLastRowCoordinate()`
+
+Get last row coordinate.
+
+```javascript
+var agent = Tamotsu.Table.define({ sheetName: 'Agents' });
+Logger.log(agent.getLastRowCoordinate());
+```
+
+### `Tamotsu.Model.getFirstColumnCoordinate()`
+
+Get first column coordinate.
+
+```javascript
+var agent = Tamotsu.Table.define({ sheetName: 'Agents' });
+Logger.log(agent.getFirstColumnCoordinate());
+```
+
+### `Tamotsu.Model.getLastColumnCoordinate()`
+
+Get last column coordinate.
+
+```javascript
+var agent = Tamotsu.Table.define({ sheetName: 'Agents' });
+Logger.log(agent.getLastColumnCoordinate());
 ```
 
 # Test
