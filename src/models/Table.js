@@ -106,7 +106,10 @@ var createTable_ = function() {
 
     columns: function() {
       if (!this.columns_memo_) {
-        this.columns_memo_ = this.dataRange().offset(0, 0, 1).getValues()[0];
+        this.columns_memo_ = this.sheet()
+          .getRange(1 + this.rowShift, 1 + this.columnShift)
+          .getDataRegion(SpreadsheetApp.Dimension.COLUMNS)
+          .getValues()[0];
       }
       return this.columns_memo_;
     },
@@ -122,11 +125,8 @@ var createTable_ = function() {
     },
 
     dataRange: function() {
-      return this.sheet().getRange(1 + this.rowShift,
-          1 + this.columnShift,
-          this.sheet().getLastRow() - this.rowShift,
-          this.sheet().getLastColumn() - this.columnShift
-      );
+      //TODO: getBaseRange
+      return this.sheet().getRange(1 + this.rowShift, 1 + this.columnShift).getDataRegion();
     },
 
     rangeByRow: function(row_) {
@@ -164,7 +164,7 @@ var createTable_ = function() {
       var that = this;
 
       var appendRow = function(values) {
-        var row = that.sheet().getLastRow() + 1;
+        var row = that.dataRange().getLastRow() + 1;
         that.sheet().getRange(row, 1 + that.columnShift, 1, that.columns().length).setValues([values]);
         record.row_ = row;
       };
