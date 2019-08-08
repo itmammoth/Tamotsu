@@ -2,54 +2,72 @@ var createTable_ = function() {
   var Table = function(attributes, options) {
     options = (options || {});
     this.row_ = options.row_;
-    
+
     attributes = (attributes || {});
     var that = this;
     this.__class.columns().forEach(function(c) {
       that[c] = attributes[c];
     });
   };
-  
+
   Object.assign(Table, {
-  
+
     sheet: function() {
       if (!this.sheet_memo_) {
         this.sheet_memo_ = ss_.getSheetByName(this.sheetName);
       }
       return this.sheet_memo_;
     },
-  
+
     first: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
-      return new this(this.objectFrom(values[0]), { row_: 2 });
+      return new this(this.objectFrom(values[0]), { row_: 2 + this.rowShift });
     },
-    
+
+    getFirstRowCoordinate: function () {
+      return 1 + this.rowShift;
+    },
+
+    getLastRowCoordinate: function () {
+      var values = this.dataRange().getValues();
+
+      return values.length + this.rowShift;
+    },
+
+    getFirstColumnCoordinate: function () {
+      return 1 + this.columnShift;
+    },
+
+    getLastColumnCoordinate: function () {
+      return this.columns().length  + this.columnShift;
+    },
+
     last: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
-      return new this(this.objectFrom(values[values.length - 1]), { row_: values.length + 1 });
+      return new this(this.objectFrom(values[values.length - 1]), { row_: values.length + 1 + this.rowShift });
     },
-    
+
     find: function(id) {
       var values = this.allValues();
       for (var i = 0; i < values.length; i++) {
         if (values[i][this.idColumnIndex()] === id) {
-          return new this(this.objectFrom(values[i]), { row_: i + 2 });
+          return new this(this.objectFrom(values[i]), { row_: i + 2 + this.rowShift });
         }
       }
       throw 'Record not found [id=' + id + ']';
     },
-    
+
     all: function() {
       var records = [];
       var that = this;
       this.allValues().forEach(function(values, i) {
-        records.push(new that(that.objectFrom(values), { row_: i + 2 }));
+        records.push(new that(that.objectFrom(values), { row_: i + 2 + that.rowShift }));
       });
       return records;
     },
-    
+
     pluck: function(column) {
       var result = [];
       var that = this;
@@ -58,7 +76,7 @@ var createTable_ = function() {
       });
       return result;
     },
-    
+
     sum: function(column) {
       var total = 0;
       var that = this;
@@ -67,50 +85,54 @@ var createTable_ = function() {
       });
       return total;
     },
-    
+
     max: function(column) {
       return Math.max.apply(null, this.pluck(column));
     },
-    
+
     min: function(column) {
       return Math.min.apply(null, this.pluck(column));
     },
-    
+
     where: function(predicate) {
       var r = new Relation_(this);
       return r.where(predicate);
     },
-    
+
     order: function(comparator) {
       var r = new Relation_(this);
       return r.order(comparator);
     },
-    
+
     columns: function() {
       if (!this.columns_memo_) {
         this.columns_memo_ = this.dataRange().offset(0, 0, 1).getValues()[0];
       }
       return this.columns_memo_;
     },
-    
+
     columnIndexOf: function(column) {
       var index = this.columns().indexOf(column);
       if (index === -1) throw 'Invalid column given!';
       return index;
     },
-  
+
     columnABCFor: function(column) {
-      return indexToABC(this.columnIndexOf(column) + 1);
+      return indexToABC(this.columnIndexOf(column) + 1 + this.columnShift);
     },
-    
+
     dataRange: function() {
-      return this.sheet().getDataRange();
+      return this.sheet().getRange(1 + this.rowShift,
+          1 + this.columnShift,
+          this.sheet().getLastRow() - this.rowShift,
+          this.sheet().getLastColumn() - this.columnShift
+      );
     },
-    
+
     rangeByRow: function(row_) {
-      return this.dataRange().offset(row_ - 1, 0, 1);
+      return this.dataRange().offset(row_ - 1 - this.rowShift, 0, 1);
     },
-    
+
     objectFrom: function(values) {
       var obj = {};
       this.columns().forEach(function(c, i) {
@@ -118,7 +140,7 @@ var createTable_ = function() {
       });
       return obj;
     },
-    
+
     valuesFrom: function(record) {
       var values = [];
       this.columns().forEach(function(c, i) {
@@ -126,27 +148,27 @@ var createTable_ = function() {
       });
       return values;
     },
-    
+
     allValues: function() {
       var allValues = this.dataRange().getValues();
       allValues.shift();
       return allValues;
     },
-    
+
     create: function(recordOrAttributes) {
       var record = recordOrAttributes.__class === this ? recordOrAttributes : new this(recordOrAttributes);
       delete record.row_;
-      
+
       if (!record.isValid()) return false;
-      
+
       var that = this;
-      
+
       var appendRow = function(values) {
         var row = that.sheet().getLastRow() + 1;
-        that.sheet().getRange(row, 1, 1, that.columns().length).setValues([values]);
+        that.sheet().getRange(row, 1 + that.columnShift, 1, that.columns().length).setValues([values]);
         record.row_ = row;
       };
-      
+
       var values = this.valuesFrom(record);
       if (isPresent(record[this.idColumn])) {
         appendRow(values);
@@ -157,10 +179,10 @@ var createTable_ = function() {
           record[that.idColumn] = nextId;
         });
       }
-      
+
       return record;
     },
-    
+
     update: function(recordOrAttributes) {
       var record = this.find(recordOrAttributes[this.idColumn]);
       record.setAttributes(recordOrAttributes);
@@ -190,17 +212,17 @@ var createTable_ = function() {
         return this.create(recordOrAttributes);
       }
     },
-    
+
     destroy: function(record) {
       this.sheet().deleteRow(record.row_);
     },
-    
+
     withNextId: function(callback) {
 	  var ids = this.idValues();
       var nextId = ids.length > 0 ? Math.max.apply(null, ids) + 1 : 1;
       callback(nextId);
     },
-    
+
     idValues: function() {
       var idValues = [];
       var that = this;
@@ -209,7 +231,7 @@ var createTable_ = function() {
       });
       return idValues;
     },
-    
+
     idColumnIndex: function() {
       if (!this.idColumnIndex_memo_) {
         var i = this.columns().indexOf(this.idColumn);
@@ -219,7 +241,7 @@ var createTable_ = function() {
       return this.idColumnIndex_memo_;
     },
   });
-  
+
   Object.defineProperties(Table.prototype, {
     save: { value: function() {
       this.errors = {};
@@ -267,7 +289,7 @@ var createTable_ = function() {
       });
     }},
   });
-  
+
   Table.define = function(classProps, instanceProps) {
     var Parent = this;
     var Child = function() { return Parent.apply(this, arguments); };
@@ -280,21 +302,23 @@ var createTable_ = function() {
     for (var name in instanceProps) {
       Object.defineProperty(Child.prototype, name, { value: instanceProps[name] });
     }
-    
+
     Object.assign(Child, Object.assign({
       idColumn: '#',
       autoIncrement: true,
+      rowShift: 0,
+      columnShift: 0,
     }, classProps));
-    
+
     return Child;
   };
-  
+
   var indexToABC = function(index) {
     var n = index - 1;
     var ordA = 'A'.charCodeAt(0);
     var ordZ = 'Z'.charCodeAt(0);
     var len = ordZ - ordA + 1;
-    
+
     var s = '';
     while (n >= 0) {
       s = String.fromCharCode(n % len + ordA) + s;
@@ -302,18 +326,18 @@ var createTable_ = function() {
     }
     return s;
   };
-  
+
   var noKeys = function(object) {
     return Object.keys(object || {}).length === 0;
   };
-  
+
   var isBlank = function(value) {
     return typeof value === 'undefined' || value === null || String(value).trim() === '';
   };
-  
+
   var isPresent = function(value) {
     return typeof value !== 'undefined' && value !== null && String(value) !== '';
   };
-  
+
   return Table;
 };
