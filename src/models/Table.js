@@ -23,6 +23,11 @@ var createTable_ = function() {
       return this.sheet().getRange(1 + this.rowShift, 1 + this.columnShift);
     },
 
+    lastRange: function () {
+      var lastAddress = this.dataRange().getA1Notation().replace(/^.*:/, '');
+      return this.sheet().getRange(lastAddress);
+    },
+
     first: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
