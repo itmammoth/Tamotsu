@@ -290,13 +290,13 @@ Agent.order(function(agent1, agent2) {
 
 ```
 
-### `Tamotsu.Table.create(model_or_attributes)`
+### `Tamotsu.Table.create(modelOrAttributes)`
 
 Creates new record in the spreadsheet with the given model or attributes and returns the new model if created successfully.
 
 |Param              |Type           |Description|
 |:------------------|:--------------|:----------|
-|model_or_attributes|model or object|Tamotsu.Table model or attribtues object|
+|modelOrAttributes|model or object|Tamotsu.Table model or attribtues object|
 
 ```javascript
 var agent = new Agent({
@@ -316,7 +316,7 @@ Agent.create({
 });
 ```
 
-### `Tamotsu.Table.createOrUpdate(model_or_attributes)`
+### `Tamotsu.Table.createOrUpdate(modelOrAttributes)`
 
 [with NOT existing id] Creates new record in the spreadsheet with the given model or attributes and returns the new model if created successfully.
 
@@ -324,7 +324,7 @@ Agent.create({
 
 |Param              |Type           |Description|
 |:------------------|:--------------|:----------|
-|model_or_attributes|model or object|Tamotsu.Table model or attribtues object|
+|modelOrAttributes|model or object|Tamotsu.Table model or attribtues object|
 
 ```javascript
 var agent = new Agent({
@@ -446,42 +446,6 @@ Set attributes to a model.
 ```javascript
 var agent = Agent.first();
 agent.setAttributes({ 'First Name': 'Morgan', 'Last Name': 'Grimes' });
-```
-
-### `Tamotsu.Model.getFirstRowCoordinate()`
-
-Get first row coordinate.
-
-```javascript
-var agent = Tamotsu.Table.define({ sheetName: 'Agents' });
-Logger.log(agent.getFirstRowCoordinate());
-```
-
-### `Tamotsu.Model.getLastRowCoordinate()`
-
-Get last row coordinate.
-
-```javascript
-var agent = Tamotsu.Table.define({ sheetName: 'Agents' });
-Logger.log(agent.getLastRowCoordinate());
-```
-
-### `Tamotsu.Model.getFirstColumnCoordinate()`
-
-Get first column coordinate.
-
-```javascript
-var agent = Tamotsu.Table.define({ sheetName: 'Agents' });
-Logger.log(agent.getFirstColumnCoordinate());
-```
-
-### `Tamotsu.Model.getLastColumnCoordinate()`
-
-Get last column coordinate.
-
-```javascript
-var agent = Tamotsu.Table.define({ sheetName: 'Agents' });
-Logger.log(agent.getLastColumnCoordinate());
 ```
 
 # Test

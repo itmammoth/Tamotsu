@@ -19,28 +19,14 @@ var createTable_ = function() {
       return this.sheet_memo_;
     },
 
+    baseRange: function () {
+      return this.sheet().getRange(1 + this.rowShift, 1 + this.columnShift);
+    },
+
     first: function() {
       var values = this.allValues();
       if (values.length === 0) return null;
       return new this(this.objectFrom(values[0]), { row_: 2 + this.rowShift });
-    },
-
-    getFirstRowCoordinate: function () {
-      return 1 + this.rowShift;
-    },
-
-    getLastRowCoordinate: function () {
-      var values = this.dataRange().getValues();
-
-      return values.length + this.rowShift;
-    },
-
-    getFirstColumnCoordinate: function () {
-      return 1 + this.columnShift;
-    },
-
-    getLastColumnCoordinate: function () {
-      return this.columns().length  + this.columnShift;
     },
 
     last: function() {
@@ -106,8 +92,7 @@ var createTable_ = function() {
 
     columns: function() {
       if (!this.columns_memo_) {
-        this.columns_memo_ = this.sheet()
-          .getRange(1 + this.rowShift, 1 + this.columnShift)
+        this.columns_memo_ = this.baseRange()
           .getDataRegion(SpreadsheetApp.Dimension.COLUMNS)
           .getValues()[0];
       }
@@ -125,8 +110,7 @@ var createTable_ = function() {
     },
 
     dataRange: function() {
-      //TODO: getBaseRange
-      return this.sheet().getRange(1 + this.rowShift, 1 + this.columnShift).getDataRegion();
+      return this.baseRange().getDataRegion();
     },
 
     rangeByRow: function(row_) {
