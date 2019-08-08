@@ -218,7 +218,7 @@ var createTable_ = function() {
     },
 
     withNextId: function(callback) {
-	  var ids = this.idValues();
+      var ids = this.idValues();
       var nextId = ids.length > 0 ? Math.max.apply(null, ids) + 1 : 1;
       callback(nextId);
     },
