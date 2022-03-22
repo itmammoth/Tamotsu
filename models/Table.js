@@ -172,6 +172,38 @@ var createTable_ = function() {
       return record;
     },
 
+    batchCreate: function(recordOrAttributesArr) {
+      var that = this;
+      var appendRows = function(valuesArr) {
+        var firstRow = that.dataRange().getLastRow() + 1;
+        that.sheet().getRange(firstRow, 1 + that.columnShift, 
+          valuesArr.length, that.columns().length).setValues(valuesArr);
+        for(var i = 0; i < records.length; i++) {
+          records[i].row_ = firstRow + i;  
+        }
+      };
+
+      var startNextId; this.withNextId(nextId => startNextId = nextId);
+      const records = [], valuesArr = []; 
+      for(var i = 0; i < recordOrAttributesArr.length; i++) {
+        var recordOrAttributes = recordOrAttributesArr[i];
+        var record = recordOrAttributes.__class === this ? recordOrAttributes : new this(recordOrAttributes);
+        delete record.row_;
+        if (!record.isValid()) return false;
+        var values = this.valuesFrom(record);
+        if (isPresent(record[this.idColumn])) {
+          valuesArr.push(values);
+        } else {
+          values[that.idColumnIndex()] = startNextId + i;
+          valuesArr.push(values);
+          record[that.idColumn] = startNextId + i;
+        }
+        records.push(record);
+      }
+      appendRows(valuesArr);
+      return records;
+    },
+
     update: function(recordOrAttributes) {
       var record = this.find(recordOrAttributes[this.idColumn]);
       record.setAttributes(recordOrAttributes);
