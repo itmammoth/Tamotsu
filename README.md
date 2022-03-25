@@ -316,6 +316,49 @@ Agent.create({
 });
 ```
 
+### `Tamotsu.Table.batchCreate(modelOrAttributesArray)`
+
+Creates new recoreds in the spreadsheet with the given models or attributes and returns the new models if created successfully.
+**Better performace than `create` one by one**
+
+|Param              |Type                    |Description|
+|:------------------|:-----------------------|:----------|
+|modelsOrAttributes |array of model or object|Array of Tamotsu.Table model or attribtues object|
+
+```javascript
+var agents = [
+  new Agent({
+    'First Name': 'Morgan',
+    'Last Name': 'Grimes',
+    'Gender': 'Male',
+    'Salary': 50,
+  }),
+  new Agent({
+    'First Name': 'Bryce',
+    'Last Name': 'Larkin',
+    'Gender': 'Male',
+    'Salary': 400,
+  }),
+];
+Agent.batchCreate(agents);  //=> [{#=4.0, First Name=Morgan, ...}, {#=5.0, First Name=Bryce, ...}]
+                            // and the data will be appended to the sheet.
+// or
+Agent.batchCreate([
+  {
+    'First Name': 'Morgan',
+    'Last Name': 'Grimes',
+    'Gender': 'Male',
+    'Salary': 50,
+  },
+  {
+    'First Name': 'Bryce',
+    'Last Name': 'Larkin',
+    'Gender': 'Male',
+    'Salary': 400,
+  },
+]);
+```
+
 ### `Tamotsu.Table.createOrUpdate(modelOrAttributes)`
 
 [with NOT existing id] Creates new record in the spreadsheet with the given model or attributes and returns the new model if created successfully.
