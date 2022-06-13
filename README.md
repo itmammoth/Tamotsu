@@ -413,7 +413,7 @@ agent['Salary'] = 10;
 agent.save(); // The data on the sheet will be updated.
 ```
 
-### `Tamotsu.Model.updateAttributes(attributes)`
+### `Tamotsu.Model.update(attributes)`
 
 Updates model and spreadsheet with the given attributes and returns true if updated successfully.
 
@@ -423,7 +423,7 @@ Updates model and spreadsheet with the given attributes and returns true if upda
 
 ```javascript
 var agent = Agent.first();
-agent.updateAttributes({ 'First Name': 'Chuck', 'Salary': 500 }); // The data on the sheet will be updated.
+agent.update({ 'First Name': 'Chuck', 'Salary': 500 }); // The data on the sheet will be updated.
 Logger.log(agent); //=>  {#=1.0, First Name=Chuck, Last Name=Bartowski, Gender=Male, Salary=500.0, ...}
 ```
 

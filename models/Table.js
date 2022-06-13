@@ -11,7 +11,7 @@ var createTable_ = function () {
     };
 
     Object.assign(Table, {
-
+        
         sheet: function () {
             if (!this.sheet_memo_) {
                 this.sheet_memo_ = ss_.getSheetByName(this.sheetName);
@@ -137,11 +137,49 @@ var createTable_ = function () {
             });
             return values;
         },
+        
+        _allValues: [],
 
         allValues: function () {
-            var allValues = this.dataRange().getValues();
-            allValues.shift();
-            return allValues;
+            if (!this._allValues.length) {
+                this._allValues = this.dataRange().getValues();
+                this._allValues.shift();
+            }
+            return this._allValues;
+        },
+
+        allValuesIndex: function (record) {
+            var recordValues = this.valuesFrom(record);
+
+            for (var i = 0; i < this._allValues.length; i++) {
+                if (this._allValues[i][this.idColumnIndex()] === recordValues[this.idColumnIndex()]) {
+                    return i;
+                }
+            }
+            throw 'Record not found [id=' + recordValues[this.idColumnIndex()] + ']';
+        },
+
+        allValuesUpdate: function (record) {
+            var recordValues = this.valuesFrom(record);
+            var recordIndex = this.allValuesIndex(record);
+
+            this._allValues[recordIndex] = recordValues;
+        },
+
+        allValuesAdd: function (record) {
+            var recordValues = this.valuesFrom(record);
+            this._allValues.push(recordValues);
+        },
+
+        allValuesAddMany: function (records) {
+            for(record of records){
+                this.allValuesAdd(record);
+            }
+        },
+
+        allValuesRemove: function (record) {
+            var recordIndex = this.allValuesIndex(record);
+            this._allValues = this._allValues.filter((value, index) => index !== recordIndex);
         },
 
         create: function (recordOrAttributes) {
@@ -168,6 +206,7 @@ var createTable_ = function () {
                     record[that.idColumn] = nextId;
                 });
             }
+            this.allValuesAdd(record);
 
             return record;
         },
@@ -201,6 +240,7 @@ var createTable_ = function () {
                 records.push(record);
             }
             appendRows(valuesArr);
+            this.allValuesAddMany(records);
             return records;
         },
 
@@ -214,6 +254,7 @@ var createTable_ = function () {
             if (record.isValid()) {
                 var values = this.valuesFrom(record);
                 this.rangeByRow(record.row_).setValues([values]);
+                this.allValuesUpdate(record);
                 return true;
             }
             return false;
@@ -236,6 +277,7 @@ var createTable_ = function () {
 
         destroy: function (record) {
             this.sheet().deleteRow(record.row_);
+            this.allValuesRemove(record);
         },
 
         withNextId: function (callback) {
@@ -271,7 +313,7 @@ var createTable_ = function () {
                 return this.__class[updateOrCreate](this);
             }
         },
-        updateAttributes: {
+        update: {
             value: function (attributes) {
                 var that = this;
                 this.__class.columns().forEach(function (c, i) {
