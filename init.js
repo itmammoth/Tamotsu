@@ -10,12 +10,12 @@ var callbacks_ = [];
  *                                  When not given, SpreadsheetApp.getActive() is used.
  */
 function initialize(spreadsheet) {
-    ss_ = spreadsheet || SpreadsheetApp.getActive();
-    Table = createTable_();
-    Relation_ = createRelation_();
-    callbacks_.forEach(function (callback) {
-        callback(spreadsheet);
-    });
+  ss_ = spreadsheet || SpreadsheetApp.getActive();
+  Table = createTable_();
+  Relation_ = createRelation_();
+  callbacks_.forEach(function (callback) {
+    callback(spreadsheet);
+  });
 }
 
 /**
@@ -24,5 +24,5 @@ function initialize(spreadsheet) {
  * @param {function} callback A function that is to be added to the callback list.
  */
 function onInitialized(callback) {
-    callbacks_.push(callback);
+  callbacks_.push(callback);
 }
