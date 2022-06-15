@@ -141,10 +141,20 @@ var createTable_ = function () {
     _allValues: [],
 
     allValues: function () {
-      if (!this._allValues.length) {
-        this._allValues = this.dataRange().getValues();
-        this._allValues.shift();
+      var sheetValues = function () {
+        var values = this.dataRange().getValues();
+        values.shift();
+        return values;
       }
+
+      if (!this.shouldCache) {
+        return sheetValues();
+      }
+
+      if (!this._allValues.length) {
+        this._allValues = sheetValues();
+      }
+
       return this._allValues;
     },
 
@@ -160,6 +170,8 @@ var createTable_ = function () {
     },
 
     allValuesUpdate: function (record) {
+      if (!this.shouldCache) return;
+
       var recordValues = this.valuesFrom(record);
       var recordIndex = this.allValuesIndex(record);
 
@@ -167,6 +179,8 @@ var createTable_ = function () {
     },
 
     allValuesAdd: function (record) {
+      if (!this.shouldCache) return;
+
       var recordValues = this.valuesFrom(record);
       this._allValues.push(recordValues);
     },
@@ -178,6 +192,8 @@ var createTable_ = function () {
     },
 
     allValuesRemove: function (record) {
+      if (!this.shouldCache) return;
+
       var recordIndex = this.allValuesIndex(record);
       this._allValues = this._allValues.filter((value, index) => index !== recordIndex);
     },
@@ -387,6 +403,7 @@ var createTable_ = function () {
       autoIncrement: true,
       rowShift: 0,
       columnShift: 0,
+      shouldCache: false,
     }, classProps));
 
     return Child;
