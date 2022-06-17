@@ -329,7 +329,7 @@ var createTable_ = function () {
         return this.__class[updateOrCreate](this);
       }
     },
-    update: {
+    updateAttributes: {
       value: function (attributes) {
         var that = this;
         this.__class.columns().forEach(function (c, i) {
