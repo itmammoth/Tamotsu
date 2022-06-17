@@ -13,7 +13,7 @@ function initialize(spreadsheet) {
   ss_ = spreadsheet || SpreadsheetApp.getActive();
   Table = createTable_();
   Relation_ = createRelation_();
-  callbacks_.forEach(function(callback) {
+  callbacks_.forEach(function (callback) {
     callback(spreadsheet);
   });
 }
